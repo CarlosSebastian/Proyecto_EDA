@@ -1,34 +1,34 @@
 #!/bin/bash
-# Script de compilación rápida para DTW Bounds
 
-set -e  # Salir si hay error
+set -e  # stop on error
 
-echo "🔨 Compilando DTW Bounds..."
+echo "Compilando Proyecto EDA (DTW Bounds)"
+echo "..."
+# Entrar a la carpeta raíz del proyecto
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
 
-# Crear directorios
-mkdir -p build/distance/elastic build/TSTester build/Utils bin
+# Directorio de salida
+BIN_DIR="$SCRIPT_DIR/bin"
+BUILD_DIR="$SCRIPT_DIR/build"
 
-# Compilar
-echo "📦 Compilando archivos fuente..."
-g++ -std=c++17 -O3 -I. -c main.cpp -o build/main.o
-g++ -std=c++17 -O3 -I. -c distance/elastic/DTW.cpp -o build/distance/elastic/DTW.o
-g++ -std=c++17 -O3 -I. -c distance/Bounds.cpp -o build/distance/Bounds.o
-g++ -std=c++17 -O3 -I. -c TSTester/Dataset.cpp -o build/TSTester/Dataset.o
-g++ -std=c++17 -O3 -I. -c TSTester/TSTester.cpp -o build/TSTester/TSTester.o
-g++ -std=c++17 -O3 -I. -c Utils/FileIterator.cpp -o build/Utils/FileIterator.o
+mkdir -p "$BIN_DIR"
+mkdir -p "$BUILD_DIR"
 
-# Enlazar
-echo "🔗 Enlazando ejecutable..."
-g++ -std=c++17 -O3 \
-    build/main.o \
-    build/distance/elastic/DTW.o \
-    build/distance/Bounds.o \
-    build/TSTester/Dataset.o \
-    build/TSTester/TSTester.o \
-    build/Utils/FileIterator.o \
-    -o bin/TSTester -lstdc++fs
+echo "Buscando archivos fuente"
+echo "..."
+CPP_FILES=$(find . -name "*.cpp")
 
-echo "✅ Compilación exitosa!"
-echo "📍 Ejecutable: bin/TSTester"
+echo "Archivos encontrados:"
+echo "$CPP_FILES"
 echo ""
-echo "Ejecuta con: ./bin/TSTester -h"
+
+echo "Compilando"
+echo "..."
+g++ -std=c++17 -O3 $CPP_FILES -o "$BIN_DIR/TSTester"
+
+echo "Compilación completa!"
+echo "Ejecutable generado: $BIN_DIR/TSTester"
+echo ""
+echo "Ejemplo de ejecución:"
+echo "  ./bin/TSTester -bkeogh,improved -W -t -d50words"

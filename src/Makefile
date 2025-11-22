@@ -1,102 +1,53 @@
-# Makefile para DTW Bounds en C++
-
-CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -O3 -march=native
-INCLUDES = -I./src/TSTester -I./src/Utils -I./src/distance -I./src/distance/elastic
-LDFLAGS = -lstdc++fs
+# Nombre del ejecutable
+TARGET = TSTester
 
 # Directorios
-SRC_DIR = src
-BUILD_DIR = build
-BIN_DIR = bin
+SRC_DIR = .
+BIN_DIR = $(SRC_DIR)/bin
+BUILD_DIR = $(SRC_DIR)/build
 
-# Archivos fuente
-SOURCES = $(SRC_DIR)/TSTester/Dataset.cpp \
-          $(SRC_DIR)/TSTester/TSTester.cpp \
-          $(SRC_DIR)/Utils/FileIterator.cpp \
-          $(SRC_DIR)/distance/Bounds.cpp \
-          $(SRC_DIR)/distance/elastic/DTW.cpp
+# Compilador y flags
+CXX = g++
+CXXFLAGS = -std=c++17 -O3 -I.
 
-# Archivos objeto
-OBJECTS = $(BUILD_DIR)/TSTester/Dataset.o \
-          $(BUILD_DIR)/TSTester/TSTester.o \
-          $(BUILD_DIR)/Utils/FileIterator.o \
-          $(BUILD_DIR)/distance/Bounds.o \
-          $(BUILD_DIR)/distance/elastic/DTW.o
+# Buscar automáticamente todos los .cpp
+SRC := $(shell find $(SRC_DIR) -name "*.cpp")
 
-# Ejecutable
-TARGET = $(BIN_DIR)/TSTester
+# Convertir cada archivo fuente a un objeto en build/
+OBJ := $(patsubst %.cpp,$(BUILD_DIR)/%.o,$(SRC))
 
-# Regla principal
-all: directories $(TARGET)
+# Separador automático de directorios
+MKDIR_P = mkdir -p
 
-# Crear directorios necesarios
-directories:
-	@mkdir -p $(BUILD_DIR)/TSTester
-	@mkdir -p $(BUILD_DIR)/Utils
-	@mkdir -p $(BUILD_DIR)/distance
-	@mkdir -p $(BUILD_DIR)/distance/elastic
-	@mkdir -p $(BIN_DIR)
+all: $(BIN_DIR)/$(TARGET)
 
-# Enlazar ejecutable
-$(TARGET): $(OBJECTS)
-	@echo "Linking..."
-	$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
-	@echo "Build complete: $(TARGET)"
+# Compilar el ejecutable final
+$(BIN_DIR)/$(TARGET): $(OBJ)
+	@$(MKDIR_P) $(BIN_DIR)
+	$(CXX) $(OBJ) -o $(BIN_DIR)/$(TARGET)
+	@echo "============================================"
+	@echo "  Compilación completa"
+	@echo "  Ejecutable: $(BIN_DIR)/$(TARGET)"
+	@echo "============================================"
 
-# Compilar Dataset.cpp
-$(BUILD_DIR)/TSTester/Dataset.o: $(SRC_DIR)/TSTester/Dataset.cpp $(SRC_DIR)/TSTester/Dataset.h $(SRC_DIR)/TSTester/ClassifiedSequence.h
-	@echo "Compiling Dataset.cpp..."
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+# Regla genérica para compilar cada archivo .cpp a .o
+$(BUILD_DIR)/%.o: %.cpp
+	@$(MKDIR_P) $(@D)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Compilar TSTester.cpp
-$(BUILD_DIR)/TSTester/TSTester.o: $(SRC_DIR)/TSTester/TSTester.cpp
-	@echo "Compiling TSTester.cpp..."
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+run: all
+	@echo "Ejecutando:"
+	./bin/$(TARGET)
 
-# Compilar FileIterator.cpp
-$(BUILD_DIR)/Utils/FileIterator.o: $(SRC_DIR)/Utils/FileIterator.cpp $(SRC_DIR)/Utils/FileIterator.h
-	@echo "Compiling FileIterator.cpp..."
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+debug: CXXFLAGS = -std=c++17 -g -O0 -I.
+debug: clean all
+	@echo "Compilado en modo debug."
 
-# Compilar Bounds.cpp
-$(BUILD_DIR)/distance/Bounds.o: $(SRC_DIR)/distance/Bounds.cpp $(SRC_DIR)/distance/Bounds.h $(SRC_DIR)/distance/BoundsID.h
-	@echo "Compiling Bounds.cpp..."
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
-
-# Compilar DTW.cpp
-$(BUILD_DIR)/distance/elastic/DTW.o: $(SRC_DIR)/distance/elastic/DTW.cpp $(SRC_DIR)/distance/elastic/DTW.h
-	@echo "Compiling DTW.cpp..."
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
-
-# Limpiar archivos compilados
 clean:
-	@echo "Cleaning..."
 	rm -rf $(BUILD_DIR) $(BIN_DIR)
-	@echo "Clean complete"
+	@echo "Limpieza completada."
 
-# Limpiar y recompilar
 rebuild: clean all
 
-# Ejecutar prueba simple
-test: all
-	@echo "Running test..."
-	./$(TARGET) -bkeogh,improved -w5
-
-# Ayuda
-help:
-	@echo "Makefile para DTW Bounds"
-	@echo ""
-	@echo "Uso:"
-	@echo "  make          - Compilar el proyecto"
-	@echo "  make clean    - Limpiar archivos compilados"
-	@echo "  make rebuild  - Limpiar y recompilar"
-	@echo "  make test     - Compilar y ejecutar prueba simple"
-	@echo "  make help     - Mostrar esta ayuda"
-	@echo ""
-	@echo "Ejemplos de ejecución:"
-	@echo "  ./bin/TSTester -bkeogh,improved,petitjean,webb -W -t"
-	@echo "  ./bin/TSTester -bkeogh,improved,petitjean,webb -W -s"
-	@echo "  ./bin/TSTester -bkeogh,improved -w5 -dCoffee,Gun_Point"
-
-.PHONY: all clean rebuild test help directories
+# Evitar que make interprete estos nombres como archivos
+.PHONY: all run debug clean rebuild
