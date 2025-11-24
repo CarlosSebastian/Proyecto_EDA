@@ -119,7 +119,6 @@ void TSTester::do1NNunsorted(BoundsID bound, int k, Dataset& train, Dataset& tes
                             std::vector<double>& letest, std::vector<double>& luetest,
                             std::vector<double>& uletest, Statistics& stats) {
     
-    // DEBUG: Imprimir qué bound se está usando
     if (verbosity > 0) {
         std::string boundName = boundsIDToString(bound);
         if (bound == BoundsID::Enhanced || bound == BoundsID::EnhancedWebb) {
@@ -278,7 +277,6 @@ void TSTester::do1NNsorted(BoundsID bound, int k, Dataset& train, Dataset& test,
             }
         }
         
-        // Calcular bounds para todas las series de entrenamiento
         for (size_t j = 0; j < train.series.size(); j++) {
             ClassifiedSequence& trainSeries = train.series[j];
             double thisBound = 0.0;
@@ -344,7 +342,6 @@ void TSTester::do1NNsorted(BoundsID bound, int k, Dataset& train, Dataset& test,
             }
         }
         
-        // Ordenar por lower bound
         std::sort(train.series.begin(), train.series.end());
         
         double nearestD = DTW::distance(testSeries.sequence, train.series[0].sequence, thisW);
@@ -371,7 +368,6 @@ void TSTester::do1NNsorted(BoundsID bound, int k, Dataset& train, Dataset& test,
     }
 }
 
-// FUNCIÓN CORREGIDA - Este es el cambio principal
 void TSTester::doNN(BoundsID bound, int k, Dataset& train, Dataset& test,
                    int w, bool winPercent, ExperimentType sort,
                    std::ofstream& timesStream, std::ofstream& timeStdStream,
@@ -379,7 +375,6 @@ void TSTester::doNN(BoundsID bound, int k, Dataset& train, Dataset& test,
     
     std::vector<double> uetest, letest, luetest, uletest;
     
-    // Calcular envelopes para todas las series de entrenamiento
     if (bound != BoundsID::None) {
         if (verbosity > 0) {
             std::cout << "  Computing envelopes for " << train.series.size() 
@@ -419,7 +414,6 @@ void TSTester::doNN(BoundsID bound, int k, Dataset& train, Dataset& test,
     
     auto startTime = std::chrono::high_resolution_clock::now();
     
-    // Determinar número de iteraciones según el tipo de experimento
     int numIterations = (sort == ExperimentType::SORTED) ? 1 : 10;
     
     for (int t = 1; t <= numIterations; t++) {
@@ -466,7 +460,6 @@ void TSTester::doNN(BoundsID bound, int k, Dataset& train, Dataset& test,
         startTime = endTime;
     }
     
-    // Ajustar desviación estándar según número de iteraciones
     double stdDev = (numIterations > 1) ? std::sqrt(varianceTime / numIterations) : 0.0;
     
     timesStream << "," << meanTime;
@@ -475,7 +468,6 @@ void TSTester::doNN(BoundsID bound, int k, Dataset& train, Dataset& test,
     prunedStream << "," << meanPruned;
 }
 
-// Resto de funciones sin cambios...
 void TSTester::runNNd(BoundsID bound, int k, int w, bool winPercent,
                      const std::string& dataset, ExperimentType sort,
                      std::ofstream& timesStream, std::ofstream& timeStdStream,
@@ -622,8 +614,6 @@ void TSTester::testNN(const std::string& baseDir, const std::string& outDir,
     prunedStream.close();
 }
 
-// [Continúa con el resto del código - doTT, runTestTightness, etc. sin cambios]
-// Por brevedad no lo repito aquí, pero el resto del código permanece igual
 
 void TSTester::doTest(int window, bool winPercent, std::vector<std::string>& boundsStr,
                      std::vector<std::string>& datasets, ExperimentType experiment,
@@ -649,12 +639,10 @@ void TSTester::doTest(int window, bool winPercent, std::vector<std::string>& bou
     
     std::string fullDate = date + "-" + std::to_string(dis(gen));
     
-    // Crear directorio base si no existe
     std::filesystem::create_directories(outName);
     
     std::string outDir = outName + OSUtils::directorySep() + fullDate;
     
-    // Crear directorio de salida
     while (std::filesystem::exists(outDir)) {
         fullDate = date + "-" + std::to_string(dis(gen));
         outDir = outName + OSUtils::directorySep() + fullDate;
@@ -674,13 +662,11 @@ void TSTester::doTest(int window, bool winPercent, std::vector<std::string>& bou
         startW = endW = window;
     }
     
-    // Parsear los bounds
     for (auto& b : boundsStr) {
         int k = 0;
         BoundsID bID = BoundsID::None;
         std::string bStr = b;
         
-        // Convertir a minúsculas para comparación
         std::transform(bStr.begin(), bStr.end(), bStr.begin(), ::tolower);
         
         if (bStr.find("enhancedwebb") == 0) {
