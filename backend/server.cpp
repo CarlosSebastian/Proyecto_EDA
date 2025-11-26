@@ -23,12 +23,12 @@ std::string getExecutablePath() {
     char buffer[MAX_PATH];
     GetModuleFileNameA(NULL, buffer, MAX_PATH);
     std::string path(buffer);
-    size_t lastSlash = path.find_last_of("\\/");
+    std::string::size_type lastSlash = path.find_last_of("\\/");
     if (lastSlash != std::string::npos) {
         path = path.substr(0, lastSlash);
     }
     // Subir un nivel (backend -> raíz)
-    size_t parentSlash = path.find_last_of("\\/");
+    std::string::size_type parentSlash = path.find_last_of("\\/");
     if (parentSlash != std::string::npos) {
         path = path.substr(0, parentSlash);
     }
@@ -86,7 +86,13 @@ std::string buildTSTesterCommand(
     const std::string& outputDir
 ) {
     std::ostringstream cmd;
-    cmd << getTSTesterPath();
+    // Envolver rutas con espacios en comillas
+    std::string testerPath = getTSTesterPath();
+    if (testerPath.find(" ") != std::string::npos) {
+        cmd << "\"" << testerPath << "\"";
+    } else {
+        cmd << testerPath;
+    }
     
     // Bounds
     cmd << " -b";
@@ -121,9 +127,21 @@ std::string buildTSTesterCommand(
     }
     // nnUnsorted es el default, no necesita flag
     
-    // Output directory
-    cmd << " -D " << getDatasetDir();
-    cmd << " -n " << outputDir;
+    // Output directory (con comillas si tiene espacios)
+    std::string datasetDir = getDatasetDir();
+    cmd << " -D ";
+    if (datasetDir.find(" ") != std::string::npos) {
+        cmd << "\"" << datasetDir << "\"";
+    } else {
+        cmd << datasetDir;
+    }
+    
+    cmd << " -n ";
+    if (outputDir.find(" ") != std::string::npos) {
+        cmd << "\"" << outputDir << "\"";
+    } else {
+        cmd << outputDir;
+    }
     
     return cmd.str();
 }

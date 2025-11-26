@@ -2,6 +2,36 @@
 
 Proyecto para comparar diferentes Lower Bounds de Dynamic Time Warping (DTW) basado en el paper "Tight lower bounds for Dynamic Time Warping" de Webb y Petitjean (2021).
 
+## ⚡ Inicio Rápido (Resumen)
+
+```powershell
+# 1. Compilar TSTester
+cd src
+make
+
+# 2. Compilar Backend API
+cd backend
+.\download_httplib.ps1
+g++ -std=c++17 -O2 -I. -I./httplib server.cpp -o server.exe -lws2_32 -lwsock32
+
+# 3. Instalar Frontend
+cd frontend
+npm install
+
+# 4. Ejecutar (en DOS terminales separadas)
+# Terminal 1 - Backend:
+cd backend
+.\server.exe
+
+# Terminal 2 - Frontend:
+cd frontend
+npm run dev
+
+# 5. Abrir navegador: http://localhost:3000
+```
+
+📖 **Para instrucciones detalladas, ve a la sección [🚀 Cómo Ejecutar el Proyecto Completo](#-cómo-ejecutar-el-proyecto-completo)**
+
 ## 🏗️ Estructura del Proyecto
 
 ```
@@ -17,63 +47,103 @@ Proyecto_EDA/
     └── src/               # Código fuente del frontend
 ```
 
-## 🚀 Inicio Rápido
+## 🚀 Cómo Ejecutar el Proyecto Completo
 
-### 1. Compilar el Backend C++ (TSTester)
+Sigue estos pasos en orden para ejecutar todo el sistema:
 
-**IMPORTANTE:** El backend API ejecuta `TSTester.exe` automáticamente, pero primero debes compilarlo.
+### 📋 Requisitos Previos
 
-```bash
+- **Compilador C++**: g++ (MinGW) o Visual Studio C++
+- **Node.js**: Versión 16 o superior
+- **PowerShell**: Para ejecutar scripts (Windows)
+- **Git**: Para clonar el repositorio (opcional)
+
+### 🔨 Paso 1: Compilar TSTester.exe
+
+El backend API necesita `TSTester.exe` compilado para ejecutar los experimentos.
+
+**En PowerShell:**
+```powershell
+# Navegar al directorio src
 cd src
+
+# Compilar TSTester
 make
-# o si no tienes make:
-g++ -std=c++17 -O3 $(find . -name "*.cpp") -o bin/TSTester
+
+# Si no tienes make, compila manualmente:
+# g++ -std=c++17 -O3 $(Get-ChildItem -Recurse -Filter "*.cpp") -o bin/TSTester.exe
 ```
 
-Esto genera `src/bin/TSTester.exe` que será ejecutado automáticamente por el backend API.
+**Verificar que se compiló correctamente:**
+```powershell
+# Debería existir el archivo
+Test-Path bin\TSTester.exe
+# Debe mostrar: True
+```
 
-### 2. Compilar el Backend API Server
+✅ **Resultado esperado**: `src/bin/TSTester.exe` debe existir
 
-**El Backend API se encarga de:**
-- ✅ Ejecutar `TSTester.exe` automáticamente con los parámetros del frontend
-- ✅ Generar CSVs automáticamente
-- ✅ Leer los CSVs y convertirlos a JSON
-- ✅ Devolver resultados al frontend
+---
 
-**NO necesitas ejecutar TSTester.exe manualmente** - el backend lo hace por ti.
+### 🔨 Paso 2: Compilar el Backend API Server
 
-```bash
+El Backend API es el servidor HTTP que ejecuta `TSTester.exe` automáticamente.
+
+**En PowerShell:**
+```powershell
+# Navegar al directorio backend
 cd backend
 
-# Descargar httplib (si no existe)
-.\download_httplib.ps1
+# Descargar httplib.h (si no existe)
+if (-not (Test-Path httplib\httplib.h)) {
+    .\download_httplib.ps1
+}
 
-# Compilar
-make
-# o manualmente:
+# Compilar el servidor
 g++ -std=c++17 -O2 -I. -I./httplib server.cpp -o server.exe -lws2_32 -lwsock32
 ```
 
-Esto genera `backend/server.exe`
+**Verificar que se compiló correctamente:**
+```powershell
+# Debería existir el archivo
+Test-Path server.exe
+# Debe mostrar: True
+```
 
-### 3. Instalar Dependencias del Frontend
+✅ **Resultado esperado**: `backend/server.exe` debe existir
 
-```bash
+---
+
+### 📦 Paso 3: Instalar Dependencias del Frontend
+
+**En PowerShell:**
+```powershell
+# Navegar al directorio frontend
 cd frontend
+
+# Instalar dependencias (primera vez puede tardar 3-5 minutos)
 npm install
 ```
 
 **Nota:** La primera vez puede tardar 3-5 minutos descargando ~310 paquetes. Esto es normal.
 
-### 4. Ejecutar el Sistema Completo
+✅ **Resultado esperado**: Debe crearse la carpeta `node_modules/` con todas las dependencias
+
+---
+
+### 🚀 Paso 4: Ejecutar el Sistema Completo
+
+Necesitas **DOS terminales PowerShell** abiertas simultáneamente:
 
 #### Terminal 1: Backend API Server
-```bash
+
+```powershell
+# Desde la raíz del proyecto
 cd backend
 .\server.exe
 ```
 
-Deberías ver:
+**Deberías ver:**
 ```
 Servidor iniciado en http://localhost:8081
 Endpoints disponibles:
@@ -82,13 +152,17 @@ Endpoints disponibles:
   GET  /api/health
 ```
 
+⚠️ **IMPORTANTE**: Deja esta terminal abierta. El servidor debe seguir corriendo.
+
 #### Terminal 2: Frontend
-```bash
+
+```powershell
+# Desde la raíz del proyecto (en una nueva terminal)
 cd frontend
 npm run dev
 ```
 
-Deberías ver:
+**Deberías ver:**
 ```
   VITE v5.x.x  ready in xxx ms
 
@@ -96,9 +170,63 @@ Deberías ver:
   ➜  Network: use --host to expose
 ```
 
-### 5. Abrir en el Navegador
+⚠️ **IMPORTANTE**: Deja esta terminal abierta también. El frontend debe seguir corriendo.
 
-Abre `http://localhost:3000` en tu navegador.
+---
+
+### 🌐 Paso 5: Abrir la Aplicación en el Navegador
+
+1. Abre tu navegador web (Chrome, Firefox, Edge, etc.)
+2. Ve a: **http://localhost:3000**
+3. Deberías ver la interfaz de la aplicación
+
+---
+
+### ✅ Verificación Rápida
+
+Para verificar que todo está funcionando:
+
+**Verificar Backend:**
+```powershell
+# En una nueva terminal
+Invoke-WebRequest -Uri "http://localhost:8081/api/health" -UseBasicParsing
+# Debe devolver: {"status":"ok"}
+```
+
+**Verificar Frontend:**
+- Abre http://localhost:3000 en tu navegador
+- Deberías ver la página de configuración de experimentos
+
+---
+
+### 📝 Resumen de Comandos Rápidos
+
+```powershell
+# 1. Compilar TSTester
+cd src
+make
+
+# 2. Compilar Backend API
+cd backend
+.\download_httplib.ps1  # Solo si no existe httplib.h
+g++ -std=c++17 -O2 -I. -I./httplib server.cpp -o server.exe -lws2_32 -lwsock32
+
+# 3. Instalar Frontend
+cd frontend
+npm install
+
+# 4. Ejecutar (en dos terminales separadas)
+# Terminal 1:
+cd backend
+.\server.exe
+
+# Terminal 2:
+cd frontend
+npm run dev
+
+# 5. Abrir navegador
+# http://localhost:3000
+```
 
 ---
 
@@ -154,34 +282,75 @@ Click en "Exportar CSVs" para descargar todos los resultados en formato CSV.
 ## 🔧 Comandos Útiles
 
 ### Compilar TSTester
-```bash
+```powershell
 cd src
 make
 ```
 
 ### Compilar Backend API
-```bash
+```powershell
 cd backend
-make
+# Asegúrate de tener httplib.h primero
+.\download_httplib.ps1
+# Compilar
+g++ -std=c++17 -O2 -I. -I./httplib server.cpp -o server.exe -lws2_32 -lwsock32
 ```
 
 ### Ejecutar Backend API
-```bash
+```powershell
 cd backend
 .\server.exe
 ```
 
 ### Ejecutar Frontend
-```bash
+```powershell
 cd frontend
 npm run dev
+```
+
+### Verificar que los Servicios Están Corriendo
+
+**Verificar Backend:**
+```powershell
+Invoke-WebRequest -Uri "http://localhost:8081/api/health" -UseBasicParsing
+# Debe devolver: {"status":"ok"}
+```
+
+**Verificar Datasets Disponibles:**
+```powershell
+Invoke-WebRequest -Uri "http://localhost:8081/api/datasets" -UseBasicParsing
+# Debe devolver una lista JSON con los datasets
+```
+
+**Verificar Procesos:**
+```powershell
+# Ver si el backend está corriendo
+Get-Process | Where-Object {$_.ProcessName -like "*server*"}
+
+# Ver si el frontend está corriendo
+Get-Process | Where-Object {$_.ProcessName -eq "node"}
+```
+
+### Detener los Servicios
+
+**Detener Backend:**
+```powershell
+# Encontrar y detener el proceso
+Get-Process | Where-Object {$_.ProcessName -like "*server*"} | Stop-Process
+```
+
+**Detener Frontend:**
+```powershell
+# Presiona Ctrl+C en la terminal donde está corriendo npm run dev
+# O detener todos los procesos node:
+Get-Process | Where-Object {$_.ProcessName -eq "node"} | Stop-Process
 ```
 
 ### Ejecutar Experimento Manualmente (sin frontend)
 
 **Nota:** Normalmente NO necesitas hacer esto, ya que el backend API ejecuta TSTester.exe automáticamente. Solo úsalo si quieres probar directamente:
 
-```bash
+```powershell
 cd src
 .\bin\TSTester.exe -bkeogh,webb -W -d50words,Adiac,CBF -D UCR_TS_Archive_2015 -n resultados
 ```
@@ -218,20 +387,163 @@ cd src
 ## 🐛 Solución de Problemas
 
 ### Error: "No se puede acceder a este sitio" en localhost:3000
-- Asegúrate de que el frontend esté ejecutándose: `cd frontend && npm run dev`
 
-### Error: "Connection refused" en el frontend
-- Verifica que el backend esté ejecutándose: `cd backend && .\server.exe`
-- Verifica que esté en el puerto 8081 (no 8080)
+**Causa:** El frontend no está ejecutándose.
 
-### Error al compilar backend
-- Asegúrate de tener g++ instalado
-- Descarga httplib: `.\download_httplib.ps1`
-- Verifica que estés en el directorio `backend`
+**Solución:**
+```powershell
+# Verificar que el frontend esté corriendo
+cd frontend
+npm run dev
+
+# Verificar que no haya errores en la terminal
+# Debe mostrar: "Local: http://localhost:3000/"
+```
+
+---
+
+### Error: "Connection refused" o "Failed to fetch" en el frontend
+
+**Causa:** El backend API no está ejecutándose o está en un puerto diferente.
+
+**Solución:**
+```powershell
+# 1. Verificar que el backend esté corriendo
+cd backend
+.\server.exe
+
+# 2. Verificar que responda
+Invoke-WebRequest -Uri "http://localhost:8081/api/health" -UseBasicParsing
+
+# 3. Verificar que no haya otro proceso usando el puerto 8081
+netstat -ano | findstr :8081
+```
+
+---
+
+### Error al compilar TSTester
+
+**Causa:** Falta el compilador o hay problemas con el Makefile.
+
+**Solución:**
+```powershell
+# Verificar que g++ esté instalado
+g++ --version
+
+# Si no está instalado, instala MinGW-w64 o Visual Studio C++
+# Luego compila manualmente:
+cd src
+g++ -std=c++17 -O3 $(Get-ChildItem -Recurse -Filter "*.cpp") -o bin/TSTester.exe
+```
+
+---
+
+### Error al compilar backend API
+
+**Causa:** Falta httplib.h o problemas con las librerías de Windows.
+
+**Solución:**
+```powershell
+cd backend
+
+# 1. Descargar httplib si no existe
+if (-not (Test-Path httplib\httplib.h)) {
+    .\download_httplib.ps1
+}
+
+# 2. Compilar con las flags correctas
+g++ -std=c++17 -O2 -I. -I./httplib server.cpp -o server.exe -lws2_32 -lwsock32
+
+# 3. Si hay errores de Windows API, verifica que tengas las headers correctas
+```
+
+---
 
 ### Error al instalar dependencias del frontend
-- Asegúrate de tener Node.js instalado (v16+)
-- Intenta: `npm cache clean --force` y luego `npm install`
+
+**Causa:** Node.js no está instalado o hay problemas con npm.
+
+**Solución:**
+```powershell
+# 1. Verificar Node.js
+node --version
+npm --version
+
+# 2. Si Node.js no está instalado, descárgalo de nodejs.org (v16+)
+
+# 3. Limpiar caché e instalar de nuevo
+cd frontend
+npm cache clean --force
+npm install
+```
+
+---
+
+### Error: "cannot open output file server.exe: Permission denied"
+
+**Causa:** El archivo `server.exe` está siendo usado por otro proceso.
+
+**Solución:**
+```powershell
+# Detener procesos que puedan estar usando server.exe
+Get-Process | Where-Object {$_.ProcessName -like "*server*"} | Stop-Process
+
+# Esperar un segundo y compilar de nuevo
+Start-Sleep -Seconds 1
+cd backend
+g++ -std=c++17 -O2 -I. -I./httplib server.cpp -o server.exe -lws2_32 -lwsock32
+```
+
+---
+
+### El experimento no genera resultados
+
+**Causa:** TSTester.exe no se ejecuta correctamente o los CSVs no se generan.
+
+**Solución:**
+```powershell
+# 1. Verificar que TSTester.exe existe
+Test-Path src\bin\TSTester.exe
+
+# 2. Verificar que los datasets existen
+Test-Path src\UCR_TS_Archive_2015
+
+# 3. Revisar los logs del backend (en la terminal donde está corriendo)
+# Debe mostrar: "Comando: ..." y "Output: ..."
+
+# 4. Verificar que se crea el directorio de resultados
+Test-Path src\resultados_api
+```
+
+---
+
+### Error: "El término 'make' no se reconoce"
+
+**Causa:** `make` no está instalado en Windows.
+
+**Solución:**
+```powershell
+# En Windows, compila manualmente con g++
+cd src
+g++ -std=c++17 -O3 $(Get-ChildItem -Recurse -Filter "*.cpp") -o bin/TSTester.exe
+```
+
+---
+
+### El frontend muestra errores de conexión
+
+**Causa:** El backend no está en el puerto correcto o hay problemas de CORS.
+
+**Solución:**
+```powershell
+# 1. Verificar que el backend esté en el puerto 8081
+# Revisa backend/server.cpp línea 648: svr.listen("localhost", 8081);
+
+# 2. Verificar que el frontend esté configurado para usar el puerto correcto
+# Revisa frontend/vite.config.ts y frontend/src/services/api.ts
+
+# 3. Reiniciar ambos servicios
+```
 
 ---
 
