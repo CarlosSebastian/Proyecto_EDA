@@ -2,7 +2,7 @@
 
 Proyecto para comparar diferentes Lower Bounds de Dynamic Time Warping (DTW) basado en el paper "Tight lower bounds for Dynamic Time Warping" de Webb y Petitjean (2021).
 
-## ⚡ Inicio Rápido (Resumen)
+## Inicio Rápido (Resumen)
 
 ```powershell
 # 1. Compilar TSTester
@@ -30,9 +30,9 @@ npm run dev
 # 5. Abrir navegador: http://localhost:3000
 ```
 
-📖 **Para instrucciones detalladas, ve a la sección [🚀 Cómo Ejecutar el Proyecto Completo](#-cómo-ejecutar-el-proyecto-completo)**
+**Para instrucciones detalladas, ve a la sección [Cómo Ejecutar el Proyecto Completo](#cómo-ejecutar-el-proyecto-completo)**
 
-## 🏗️ Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 Proyecto_EDA/
@@ -47,18 +47,18 @@ Proyecto_EDA/
     └── src/               # Código fuente del frontend
 ```
 
-## 🚀 Cómo Ejecutar el Proyecto Completo
+## Cómo Ejecutar el Proyecto Completo
 
 Sigue estos pasos en orden para ejecutar todo el sistema:
 
-### 📋 Requisitos Previos
+### Requisitos Previos
 
 - **Compilador C++**: g++ (MinGW) o Visual Studio C++
 - **Node.js**: Versión 16 o superior
 - **PowerShell**: Para ejecutar scripts (Windows)
 - **Git**: Para clonar el repositorio (opcional)
 
-### 🔨 Paso 1: Compilar TSTester.exe
+### Paso 1: Compilar TSTester.exe
 
 El backend API necesita `TSTester.exe` compilado para ejecutar los experimentos.
 
@@ -81,11 +81,11 @@ Test-Path bin\TSTester.exe
 # Debe mostrar: True
 ```
 
-✅ **Resultado esperado**: `src/bin/TSTester.exe` debe existir
+**Resultado esperado**: `src/bin/TSTester.exe` debe existir
 
 ---
 
-### 🔨 Paso 2: Compilar el Backend API Server
+### Paso 2: Compilar el Backend API Server
 
 El Backend API es el servidor HTTP que ejecuta `TSTester.exe` automáticamente.
 
@@ -110,11 +110,11 @@ Test-Path server.exe
 # Debe mostrar: True
 ```
 
-✅ **Resultado esperado**: `backend/server.exe` debe existir
+**Resultado esperado**: `backend/server.exe` debe existir
 
 ---
 
-### 📦 Paso 3: Instalar Dependencias del Frontend
+### Paso 3: Instalar Dependencias del Frontend
 
 **En PowerShell:**
 ```powershell
@@ -127,11 +127,11 @@ npm install
 
 **Nota:** La primera vez puede tardar 3-5 minutos descargando ~310 paquetes. Esto es normal.
 
-✅ **Resultado esperado**: Debe crearse la carpeta `node_modules/` con todas las dependencias
+**Resultado esperado**: Debe crearse la carpeta `node_modules/` con todas las dependencias
 
 ---
 
-### 🚀 Paso 4: Ejecutar el Sistema Completo
+### Paso 4: Ejecutar el Sistema Completo
 
 Necesitas **DOS terminales PowerShell** abiertas simultáneamente:
 
@@ -152,7 +152,7 @@ Endpoints disponibles:
   GET  /api/health
 ```
 
-⚠️ **IMPORTANTE**: Deja esta terminal abierta. El servidor debe seguir corriendo.
+**IMPORTANTE**: Deja esta terminal abierta. El servidor debe seguir corriendo.
 
 #### Terminal 2: Frontend
 
@@ -170,11 +170,11 @@ npm run dev
   ➜  Network: use --host to expose
 ```
 
-⚠️ **IMPORTANTE**: Deja esta terminal abierta también. El frontend debe seguir corriendo.
+**IMPORTANTE**: Deja esta terminal abierta también. El frontend debe seguir corriendo.
 
 ---
 
-### 🌐 Paso 5: Abrir la Aplicación en el Navegador
+### Paso 5: Abrir la Aplicación en el Navegador
 
 1. Abre tu navegador web (Chrome, Firefox, Edge, etc.)
 2. Ve a: **http://localhost:3000**
@@ -182,7 +182,7 @@ npm run dev
 
 ---
 
-### ✅ Verificación Rápida
+### Verificación Rápida
 
 Para verificar que todo está funcionando:
 
@@ -199,7 +199,7 @@ Invoke-WebRequest -Uri "http://localhost:8081/api/health" -UseBasicParsing
 
 ---
 
-### 📝 Resumen de Comandos Rápidos
+### Resumen de Comandos Rápidos
 
 ```powershell
 # 1. Compilar TSTester
@@ -230,14 +230,14 @@ npm run dev
 
 ---
 
-## 📋 Uso de la Aplicación
+## Uso de la Aplicación
 
 ### Configurar un Experimento
 
 1. **Tipos de Experimento:**
-   - ☑️ Tightness Test (-t): Calcula tightness promedio
-   - ☑️ 1-NN UNSORTED: Nearest Neighbor sin ordenar (10 iteraciones)
-   - ☑️ 1-NN SORTED: Nearest Neighbor ordenado (1 iteración)
+   - Tightness Test (-t): Calcula tightness promedio
+   - 1-NN UNSORTED: Nearest Neighbor sin ordenar (10 iteraciones)
+   - 1-NN SORTED: Nearest Neighbor ordenado (1 iteración)
 
 2. **Configuración de Ventana:**
    - **Óptima (-W)**: Usa ventana óptima para cada dataset (recomendado)
@@ -279,7 +279,7 @@ Click en "Exportar CSVs" para descargar todos los resultados en formato CSV.
 
 ---
 
-## 🔧 Comandos Útiles
+## Comandos Útiles
 
 ### Compilar TSTester
 ```powershell
@@ -357,7 +357,7 @@ cd src
 
 ---
 
-## 📊 Ejemplo de Uso
+## Ejemplo de Uso
 
 ### Comparar Webb y Petitjean vs Keogh
 
@@ -384,7 +384,7 @@ cd src
 
 ---
 
-## 🐛 Solución de Problemas
+## Solución de Problemas
 
 ### Error: "No se puede acceder a este sitio" en localhost:3000
 
@@ -547,27 +547,27 @@ g++ -std=c++17 -O3 $(Get-ChildItem -Recurse -Filter "*.cpp") -o bin/TSTester.exe
 
 ---
 
-## 📝 Referencias
+## Referencias
 
 - **Paper Base**: Webb, G. I., & Petitjean, F. (2021). Tight lower bounds for Dynamic Time Warping. *Pattern Recognition*.
 - **UCR Time Series Archive**: https://www.cs.ucr.edu/~eamonn/time_series_data_2018/
 
 ---
 
-## 🎯 Características
+## Características
 
-- ✅ Comparación múltiple de Lower Bounds
-- ✅ Gráficas de tightness relativo (tipo paper)
-- ✅ Comparación de tiempos de ejecución
-- ✅ Visualización de series podadas
-- ✅ Tablas interactivas con ordenamiento
-- ✅ Exportación a CSV
-- ✅ Ejecución automática de experimentos
-- ✅ Interfaz web moderna y responsive
+- Comparación múltiple de Lower Bounds
+- Gráficas de tightness relativo (tipo paper)
+- Comparación de tiempos de ejecución
+- Visualización de series podadas
+- Tablas interactivas con ordenamiento
+- Exportación a CSV
+- Ejecución automática de experimentos
+- Interfaz web moderna y responsive
 
 ---
 
-## 📦 Dependencias
+## Dependencias
 
 ### Backend C++
 - C++17 compatible compiler (g++, clang, MSVC)
@@ -582,13 +582,13 @@ g++ -std=c++17 -O3 $(Get-ChildItem -Recurse -Filter "*.cpp") -o bin/TSTester.exe
 
 ---
 
-## 🔗 Puertos
+## Puertos
 
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8081
 
 ---
 
-## 📄 Licencia
+## Licencia
 
 Este proyecto está basado en el paper Webb2021.pdf y utiliza el UCR Time Series Archive.
