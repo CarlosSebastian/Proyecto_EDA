@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import {
-  Paper,
+  Card,
   Typography,
   TextField,
   Autocomplete,
   Chip,
   Box,
+  Divider,
 } from '@mui/material';
+import StorageIcon from '@mui/icons-material/Storage';
 import { AVAILABLE_DATASETS } from '@/types/bounds';
 
 interface DatasetSelectorProps {
@@ -19,10 +21,22 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
   onDatasetsChange,
 }) => {
   return (
-    <Paper sx={{ p: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Datasets
-      </Typography>
+    <Card sx={{ p: 3, borderRadius: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <StorageIcon sx={{ mr: 1, color: 'primary.main' }} />
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          Datasets UCR
+        </Typography>
+        {selectedDatasets.length > 0 && (
+          <Chip 
+            label={`${selectedDatasets.length} seleccionado${selectedDatasets.length !== 1 ? 's' : ''}`} 
+            size="small" 
+            color="primary" 
+            sx={{ ml: 2 }} 
+          />
+        )}
+      </Box>
+      <Divider sx={{ mb: 2 }} />
       <Autocomplete
         multiple
         options={AVAILABLE_DATASETS}
@@ -32,7 +46,12 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
           <TextField
             {...params}
             label="Seleccionar datasets"
-            placeholder="Buscar o seleccionar datasets"
+            placeholder="Buscar o seleccionar datasets del UCR Archive"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+              },
+            }}
           />
         )}
         renderTags={(value, getTagProps) =>
@@ -41,6 +60,8 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
               label={option}
               {...getTagProps({ index })}
               key={option}
+              color="primary"
+              variant="outlined"
             />
           ))
         }
@@ -48,10 +69,13 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
       />
       <Box sx={{ mt: 2 }}>
         <Typography variant="body2" color="text.secondary">
-          {selectedDatasets.length} dataset(s) seleccionado(s)
+          {selectedDatasets.length > 0 
+            ? `${selectedDatasets.length} dataset${selectedDatasets.length !== 1 ? 's' : ''} seleccionado${selectedDatasets.length !== 1 ? 's' : ''} del UCR Time Series Archive`
+            : 'Selecciona al menos un dataset para ejecutar el experimento'
+          }
         </Typography>
       </Box>
-    </Paper>
+    </Card>
   );
 };
 

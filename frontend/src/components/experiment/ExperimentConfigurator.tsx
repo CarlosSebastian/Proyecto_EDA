@@ -13,7 +13,15 @@ import {
   Button,
   Box,
   Alert,
+  Card,
+  CardContent,
+  Divider,
+  Chip,
+  Stack,
 } from '@mui/material';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ScienceIcon from '@mui/icons-material/Science';
 import { BoundSelector } from './BoundSelector';
 import { DatasetSelector } from './DatasetSelector';
 import type { ExperimentConfig } from '@/types/experiment';
@@ -89,11 +97,15 @@ export const ExperimentConfigurator: React.FC<ExperimentConfiguratorProps> = ({
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Paper sx={{ p: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Tipos de Experimento
-        </Typography>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <Card sx={{ p: 3, borderRadius: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <ScienceIcon sx={{ mr: 1, color: 'primary.main' }} />
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Tipos de Experimento
+          </Typography>
+        </Box>
+        <Divider sx={{ mb: 2 }} />
         <FormGroup>
           <FormControlLabel
             control={
@@ -138,12 +150,16 @@ export const ExperimentConfigurator: React.FC<ExperimentConfiguratorProps> = ({
             label="1-NN SORTED (ventana óptima)"
           />
         </FormGroup>
-      </Paper>
+      </Card>
 
-      <Paper sx={{ p: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Configuración de Ventana
-        </Typography>
+      <Card sx={{ p: 3, borderRadius: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <SettingsIcon sx={{ mr: 1, color: 'primary.main' }} />
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Configuración de Ventana
+          </Typography>
+        </Box>
+        <Divider sx={{ mb: 2 }} />
         <FormControl component="fieldset">
           <RadioGroup
             value={windowType}
@@ -199,7 +215,7 @@ export const ExperimentConfigurator: React.FC<ExperimentConfiguratorProps> = ({
             />
           </Box>
         )}
-      </Paper>
+      </Card>
 
       <BoundSelector
         selectedBounds={selectedBounds}
@@ -215,22 +231,58 @@ export const ExperimentConfigurator: React.FC<ExperimentConfiguratorProps> = ({
         onDatasetsChange={setSelectedDatasets}
       />
 
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleRun}
-          disabled={isLoading}
-          size="large"
-        >
-          {isLoading ? 'Ejecutando...' : 'Ejecutar Experimento'}
-        </Button>
-        {onLoadCSV && (
-          <Button variant="outlined" onClick={onLoadCSV}>
-            Cargar CSV Existente
-          </Button>
-        )}
-      </Box>
+      <Card sx={{ p: 3, borderRadius: 3, bgcolor: 'primary.main', color: 'white' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, color: 'white' }}>
+              Listo para ejecutar
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+              {selectedBounds.length} bound{selectedBounds.length !== 1 ? 's' : ''} seleccionado{selectedBounds.length !== 1 ? 's' : ''} • {selectedDatasets.length} dataset{selectedDatasets.length !== 1 ? 's' : ''} seleccionado{selectedDatasets.length !== 1 ? 's' : ''}
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={2}>
+            {onLoadCSV && (
+              <Button 
+                variant="outlined" 
+                onClick={onLoadCSV}
+                sx={{
+                  borderColor: 'white',
+                  color: 'white',
+                  '&:hover': {
+                    borderColor: 'rgba(255, 255, 255, 0.8)',
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
+              >
+                Cargar CSV
+              </Button>
+            )}
+            <Button
+              variant="contained"
+              onClick={handleRun}
+              disabled={isLoading}
+              size="large"
+              startIcon={<PlayArrowIcon />}
+              sx={{
+                bgcolor: 'white',
+                color: 'primary.main',
+                fontWeight: 600,
+                px: 4,
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.9)',
+                },
+                '&:disabled': {
+                  bgcolor: 'rgba(255, 255, 255, 0.5)',
+                  color: 'white',
+                },
+              }}
+            >
+              {isLoading ? 'Ejecutando...' : 'Ejecutar Experimento'}
+            </Button>
+          </Stack>
+        </Box>
+      </Card>
     </Box>
   );
 };

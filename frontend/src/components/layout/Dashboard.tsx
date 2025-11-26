@@ -8,7 +8,16 @@ import {
   Alert,
   CircularProgress,
   Button,
+  AppBar,
+  Toolbar,
+  Chip,
+  Card,
+  CardContent,
+  Grid,
 } from '@mui/material';
+import ScienceIcon from '@mui/icons-material/Science';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import DownloadIcon from '@mui/icons-material/Download';
 import { ExperimentConfigurator } from '../experiment/ExperimentConfigurator';
 import { RelativeTightnessChart } from '../charts/RelativeTightnessChart';
 import { TimeComparisonChart } from '../charts/TimeComparisonChart';
@@ -111,37 +120,106 @@ export const Dashboard: React.FC = () => {
   const compareToBounds = boundsInResults.filter(b => b !== baseline);
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        DTW Bounds Comparison Tool
-      </Typography>
-      <Typography variant="body1" color="text.secondary" paragraph>
-        Herramienta para comparar Lower Bounds de Dynamic Time Warping basada en Webb2021.pdf
-      </Typography>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      <AppBar 
+        position="static" 
+        elevation={0}
+        sx={{ 
+          background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        }}
+      >
+        <Toolbar>
+          <ScienceIcon sx={{ mr: 2, fontSize: 32 }} />
+          <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 700 }}>
+            DTW Bounds Comparison
+          </Typography>
+          {results.length > 0 && (
+            <Chip 
+              label={`${results.length} resultados`} 
+              color="secondary" 
+              sx={{ bgcolor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}
+            />
+          )}
+        </Toolbar>
+      </AppBar>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
+            Comparación de Lower Bounds DTW
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.1rem' }}>
+            Herramienta para comparar Lower Bounds de Dynamic Time Warping basada en el paper Webb2021.pdf
+          </Typography>
+        </Box>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)}>
-          <Tab label="Configuración" />
-          <Tab label="Resultados" disabled={results.length === 0} />
-        </Tabs>
-      </Box>
+        {error && (
+          <Alert 
+            severity="error" 
+            sx={{ mb: 3, borderRadius: 2 }} 
+            onClose={() => setError(null)}
+          >
+            {error}
+          </Alert>
+        )}
+
+        <Card sx={{ mb: 3, borderRadius: 3 }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs 
+              value={tabValue} 
+              onChange={(_, newValue) => setTabValue(newValue)}
+              sx={{
+                '& .MuiTab-root': {
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  minHeight: 64,
+                },
+              }}
+            >
+              <Tab label="Configuración de Experimento" />
+              <Tab 
+                label="Resultados" 
+                disabled={results.length === 0}
+                sx={{ 
+                  '&.Mui-disabled': { 
+                    opacity: 0.5 
+                  } 
+                }}
+              />
+            </Tabs>
+          </Box>
 
       <TabPanel value={tabValue} index={0}>
         {isLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              minHeight: 500,
+              background: 'linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%)',
+              borderRadius: 3,
+              border: '2px dashed',
+              borderColor: 'primary.main',
+            }}
+          >
             <Box sx={{ textAlign: 'center' }}>
-              <CircularProgress size={60} />
-              <Typography variant="h6" sx={{ mt: 2 }}>
+              <CircularProgress 
+                size={80} 
+                thickness={4}
+                sx={{ 
+                  color: 'primary.main',
+                  mb: 3,
+                }} 
+              />
+              <Typography variant="h5" sx={{ mt: 2, fontWeight: 600, mb: 1 }}>
                 Ejecutando experimento...
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Esto puede tomar varios minutos dependiendo de los datasets seleccionados
+              <Typography variant="body1" color="text.secondary" sx={{ mt: 1, maxWidth: 400 }}>
+                Esto puede tomar varios minutos dependiendo de los datasets seleccionados.
+                Por favor, no cierres esta ventana.
               </Typography>
             </Box>
           </Box>
@@ -156,29 +234,71 @@ export const Dashboard: React.FC = () => {
 
       <TabPanel value={tabValue} index={1}>
         {results.length > 0 && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="h5">Resultados del Experimento</Typography>
-              <Button variant="outlined" onClick={handleExportCSV}>
-                Exportar CSVs
-              </Button>
-            </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <Card sx={{ p: 3, background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: 'white' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box>
+                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: 'white' }}>
+                    Resultados del Experimento
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                    {results.length} dataset{results.length > 1 ? 's' : ''} procesado{results.length > 1 ? 's' : ''}
+                  </Typography>
+                </Box>
+                <Button 
+                  variant="contained" 
+                  onClick={handleExportCSV}
+                  startIcon={<DownloadIcon />}
+                  sx={{
+                    bgcolor: 'white',
+                    color: 'primary.main',
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 255, 255, 0.9)',
+                    },
+                  }}
+                >
+                  Exportar CSVs
+                </Button>
+              </Box>
+            </Card>
 
-            {results.some(r => Object.values(r.bounds).some(b => b.tightness !== undefined)) && (
-              <RelativeTightnessChart
-                results={results}
-                baseline={baseline}
-                compareTo={compareToBounds}
-              />
-            )}
+            <Grid container spacing={3}>
+              {results.some(r => Object.values(r.bounds).some(b => b.tightness !== undefined)) && (
+                <Grid item xs={12}>
+                  <Card sx={{ p: 3 }}>
+                    <RelativeTightnessChart
+                      results={results}
+                      baseline={baseline}
+                      compareTo={compareToBounds}
+                    />
+                  </Card>
+                </Grid>
+              )}
 
-            <TimeComparisonChart results={results} bounds={boundsInResults} />
-            <PrunedComparisonChart results={results} bounds={boundsInResults} />
-            <ResultsTable results={results} bounds={boundsInResults} />
+              <Grid item xs={12}>
+                <Card sx={{ p: 3 }}>
+                  <TimeComparisonChart results={results} bounds={boundsInResults} />
+                </Card>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Card sx={{ p: 3 }}>
+                  <PrunedComparisonChart results={results} bounds={boundsInResults} />
+                </Card>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Card sx={{ p: 3 }}>
+                  <ResultsTable results={results} bounds={boundsInResults} />
+                </Card>
+              </Grid>
+            </Grid>
           </Box>
         )}
       </TabPanel>
+      </Card>
     </Container>
+    </Box>
   );
 };
 

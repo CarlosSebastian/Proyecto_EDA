@@ -3,11 +3,15 @@ import {
   FormGroup,
   FormControlLabel,
   Checkbox,
-  Paper,
+  Card,
   Typography,
   TextField,
   Box,
+  Divider,
+  Chip,
+  Stack,
 } from '@mui/material';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import { AVAILABLE_BOUNDS, type Bound } from '@/types/bounds';
 
 interface BoundSelectorProps {
@@ -39,10 +43,22 @@ export const BoundSelector: React.FC<BoundSelectorProps> = ({
   };
 
   return (
-    <Paper sx={{ p: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Lower Bounds a Comparar
-      </Typography>
+    <Card sx={{ p: 3, borderRadius: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <CompareArrowsIcon sx={{ mr: 1, color: 'primary.main' }} />
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          Lower Bounds a Comparar
+        </Typography>
+        {selectedBounds.length > 0 && (
+          <Chip 
+            label={`${selectedBounds.length} seleccionado${selectedBounds.length !== 1 ? 's' : ''}`} 
+            size="small" 
+            color="primary" 
+            sx={{ ml: 2 }} 
+          />
+        )}
+      </Box>
+      <Divider sx={{ mb: 2 }} />
       <FormGroup>
         {AVAILABLE_BOUNDS.map(bound => (
           <Box key={bound.id} sx={{ mb: 1 }}>
@@ -71,7 +87,7 @@ export const BoundSelector: React.FC<BoundSelectorProps> = ({
           </Box>
         ))}
       </FormGroup>
-    </Paper>
+    </Card>
   );
 };
 
