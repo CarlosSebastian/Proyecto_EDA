@@ -25,6 +25,8 @@ import { PrunedComparisonChart } from '../charts/PrunedComparisonChart';
 import { ResultsTable } from '../tables/ResultsTable';
 import { experimentApi } from '@/services/api';
 import { generateAllCSVs, downloadCSV } from '@/services/csvGenerator';
+import { parseMultipleCSVs } from '@/services/csvParser';
+import Papa from 'papaparse';
 import type { ExperimentConfig, ExperimentResult } from '@/types/experiment';
 
 interface TabPanelProps {
@@ -55,7 +57,7 @@ export const Dashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedBounds, setSelectedBounds] = useState<string[]>([]);
-  const [baseline, setBaseline] = useState<string>('keogh');
+  const [baseline, setBaseline] = useState<string>('');
 
   const handleRunExperiment = async (config: ExperimentConfig) => {
     setIsLoading(true);
@@ -66,6 +68,9 @@ export const Dashboard: React.FC = () => {
       console.log('Enviando configuración:', config);
       const response = await experimentApi.runExperiment(config);
       console.log('Respuesta recibida:', response);
+      console.log('Status:', response.status);
+      console.log('Results:', response.results);
+      console.log('Results length:', response.results?.length);
       
       if (response.status === 'error') {
         setError(response.error || 'Error ejecutando experimento');
@@ -76,8 +81,13 @@ export const Dashboard: React.FC = () => {
       if (response.results && response.results.length > 0) {
         setResults(response.results);
         setTabValue(1); // Cambiar a tab de resultados
+        setError(null);
       } else {
-        setError('No se recibieron resultados del servidor');
+        const errorMsg = response.error 
+          ? `Error del servidor: ${response.error}` 
+          : 'No se recibieron resultados del servidor. Verifica la consola del backend para más detalles.';
+        setError(errorMsg);
+        console.error('Respuesta sin resultados:', JSON.stringify(response, null, 2));
       }
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || err.message || 'Error al ejecutar experimento';
@@ -109,15 +119,112 @@ export const Dashboard: React.FC = () => {
   };
 
   const handleLoadCSV = () => {
-    // TODO: Implementar carga de CSV
-    alert('Funcionalidad de carga de CSV próximamente');
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv';
+    input.multiple = true;
+    input.onchange = async (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (!files || files.length === 0) return;
+
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const csvFiles: { content: string; type: 'times' | 'pruned' | 'accuracy' | 'tightness' | 'timeDev' }[] = [];
+        
+        // Leer todos los archivos
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const content = await file.text();
+          
+          // Determinar el tipo de CSV según el nombre del archivo
+          let type: 'times' | 'pruned' | 'accuracy' | 'tightness' | 'timeDev' = 'times';
+          const fileName = file.name.toLowerCase();
+          
+          if (fileName.includes('pruned')) {
+            type = 'pruned';
+          } else if (fileName.includes('accuracy')) {
+            type = 'accuracy';
+          } else if (fileName.includes('tightness')) {
+            type = 'tightness';
+          } else if (fileName.includes('time-dev') || fileName.includes('timedev')) {
+            type = 'timeDev';
+          } else if (fileName.includes('times') || fileName.includes('time')) {
+            type = 'times';
+          }
+          
+          csvFiles.push({ content, type });
+        }
+
+        if (csvFiles.length === 0) {
+          setError('No se pudieron leer los archivos CSV');
+          setIsLoading(false);
+          return;
+        }
+
+        // Extraer datasets de la primera columna del primer CSV
+        const firstCSV = Papa.parse(csvFiles[0].content, { 
+          header: true,
+          skipEmptyLines: true 
+        });
+        
+        if (firstCSV.data.length === 0) {
+          setError('Los archivos CSV están vacíos o no tienen el formato correcto');
+          setIsLoading(false);
+          return;
+        }
+
+        const datasets = firstCSV.data
+          .map((row: any) => {
+            const firstKey = Object.keys(row)[0];
+            return row[firstKey] as string;
+          })
+          .filter((d: string) => d && d.trim() !== '' && d.toLowerCase() !== 'dataset');
+
+        if (datasets.length === 0) {
+          setError('No se encontraron datasets en los archivos CSV. Asegúrate de que el CSV tenga una columna "Dataset" o similar.');
+          setIsLoading(false);
+          return;
+        }
+
+        // Parsear todos los CSVs
+        const parsedResults = parseMultipleCSVs(
+          csvFiles,
+          datasets,
+          'nnUnsorted', // Tipo por defecto
+          -2 // Ventana óptima por defecto
+        );
+
+        if (parsedResults.length > 0) {
+          setResults(parsedResults);
+          setSelectedBounds(Object.keys(parsedResults[0].bounds));
+          setTabValue(1); // Cambiar a tab de resultados
+          setError(null);
+        } else {
+          setError('No se pudieron parsear los archivos CSV. Verifica el formato de los archivos.');
+        }
+      } catch (err: any) {
+        setError(`Error al cargar CSV: ${err.message}`);
+        console.error('Error cargando CSV:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    input.click();
   };
 
   const boundsInResults = results.length > 0 
     ? Object.keys(results[0].bounds)
     : selectedBounds;
+  
+  // Determinar baseline automáticamente: usar el primer bound disponible si no hay baseline o no existe
+  const effectiveBaseline = results.length > 0 && boundsInResults.length > 0
+    ? (baseline && boundsInResults.includes(baseline) ? baseline : boundsInResults[0])
+    : (baseline || 'keogh');
+  
+  const compareToBounds = boundsInResults.filter(b => b !== effectiveBaseline);
 
-  const compareToBounds = boundsInResults.filter(b => b !== baseline);
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -266,11 +373,11 @@ export const Dashboard: React.FC = () => {
               {results.some(r => Object.values(r.bounds).some(b => b.tightness !== undefined)) && (
                 <Grid item xs={12}>
                   <Card sx={{ p: 3 }}>
-                    <RelativeTightnessChart
-                      results={results}
-                      baseline={baseline}
-                      compareTo={compareToBounds}
-                    />
+                             <RelativeTightnessChart
+                               results={results}
+                               baseline={effectiveBaseline}
+                               compareTo={compareToBounds}
+                             />
                   </Card>
                 </Grid>
               )}

@@ -31,17 +31,27 @@ export const RelativeTightnessChart: React.FC<RelativeTightnessChartProps> = ({
       dataset: exp.dataset,
     };
 
-    compareTo.forEach(bound => {
-      const baselineData = exp.bounds[baseline];
-      const compareData = exp.bounds[bound];
+    // Verificar que el baseline existe en los resultados
+    const baselineData = exp.bounds[baseline];
+    if (!baselineData?.tightness) {
+      // Si no hay baseline, mostrar valores absolutos en lugar de ratios
+      compareTo.forEach(bound => {
+        const compareData = exp.bounds[bound];
+        data[bound] = compareData?.tightness || 0;
+      });
+    } else {
+      // Calcular ratios relativos al baseline
+      compareTo.forEach(bound => {
+        const compareData = exp.bounds[bound];
 
-      if (baselineData?.tightness && compareData?.tightness) {
-        // Ratio: si > 1.0, el bound comparado es más tight
-        data[bound] = compareData.tightness / baselineData.tightness;
-      } else {
-        data[bound] = 1.0;
-      }
-    });
+        if (compareData?.tightness) {
+          // Ratio: si > 1.0, el bound comparado es más tight
+          data[bound] = compareData.tightness / baselineData.tightness;
+        } else {
+          data[bound] = 0;
+        }
+      });
+    }
 
     return data;
   });

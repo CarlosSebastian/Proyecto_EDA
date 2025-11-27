@@ -265,17 +265,28 @@ export const ExperimentConfigurator: React.FC<ExperimentConfiguratorProps> = ({
               size="large"
               startIcon={<PlayArrowIcon />}
               sx={{
-                bgcolor: 'white',
-                color: 'primary.main',
-                fontWeight: 600,
+                bgcolor: '#4caf50',
+                color: 'white',
+                fontWeight: 700,
                 px: 4,
+                py: 1.5,
+                fontSize: '1.1rem',
+                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                textTransform: 'none',
                 '&:hover': {
-                  bgcolor: 'rgba(255, 255, 255, 0.9)',
+                  bgcolor: '#45a049',
+                  boxShadow: '0 6px 16px rgba(76, 175, 80, 0.5)',
+                  transform: 'translateY(-2px)',
+                },
+                '&:active': {
+                  transform: 'translateY(0px)',
                 },
                 '&:disabled': {
-                  bgcolor: 'rgba(255, 255, 255, 0.5)',
+                  bgcolor: 'rgba(76, 175, 80, 0.5)',
                   color: 'white',
+                  boxShadow: 'none',
                 },
+                transition: 'all 0.2s ease-in-out',
               }}
             >
               {isLoading ? 'Ejecutando...' : 'Ejecutar Experimento'}
