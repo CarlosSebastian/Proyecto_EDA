@@ -62,8 +62,16 @@ struct ExperimentResult {
 // Función para ejecutar comando y capturar output
 std::string executeCommand(const std::string& command) {
     std::string result;
-    FILE* pipe = _popen(command.c_str(), "r");
+    std::cout << "Ejecutando comando: " << command << "\n";
+    
+    // En Windows, _popen necesita que el comando esté en un formato específico
+    // Usar cmd /c para ejecutar el comando correctamente
+    std::string fullCommand = "cmd /c \"" + command + "\"";
+    std::cout << "Comando completo: " << fullCommand << "\n";
+    
+    FILE* pipe = _popen(fullCommand.c_str(), "r");
     if (!pipe) {
+        std::cerr << "ERROR: No se pudo abrir el pipe para ejecutar el comando\n";
         return "Error ejecutando comando";
     }
     
@@ -71,7 +79,11 @@ std::string executeCommand(const std::string& command) {
     while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
         result += buffer;
     }
-    _pclose(pipe);
+    
+    int exitCode = _pclose(pipe);
+    std::cout << "Código de salida: " << exitCode << "\n";
+    std::cout << "Output capturado: " << (result.empty() ? "(vacío)" : result.substr(0, 200)) << "\n";
+    
     return result;
 }
 
@@ -280,14 +292,17 @@ std::string resultsToJSON(const std::vector<std::vector<std::vector<std::string>
 // Función para encontrar el directorio de resultados más reciente
 std::string findLatestResultsDir(const std::string& baseDir) {
     if (!fs::exists(baseDir)) {
+        std::cerr << "Directorio base no existe: " << baseDir << "\n";
         return "";
     }
     
     std::string latest;
     auto latestTime = std::chrono::system_clock::time_point::min();
+    int dirCount = 0;
     
     for (const auto& entry : fs::directory_iterator(baseDir)) {
         if (entry.is_directory()) {
+            dirCount++;
             auto writeTime = fs::last_write_time(entry.path());
             auto timePoint = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
                 writeTime - fs::file_time_type::clock::now() + std::chrono::system_clock::now());
@@ -298,6 +313,9 @@ std::string findLatestResultsDir(const std::string& baseDir) {
             }
         }
     }
+    
+    std::cout << "Directorios encontrados en " << baseDir << ": " << dirCount << "\n";
+    std::cout << "Directorio más reciente: " << (latest.empty() ? "(ninguno)" : latest) << "\n";
     
     return latest;
 }
@@ -502,13 +520,16 @@ int main() {
                 std::string output = executeCommand(cmd);
                 std::cout << "Output: " << output << "\n";
                 
-                // Esperar a que se generen los archivos
-                std::this_thread::sleep_for(std::chrono::seconds(3));
+                // Esperar a que se generen los archivos (aumentar tiempo para datasets grandes)
+                std::this_thread::sleep_for(std::chrono::seconds(5));
                 
                 // Encontrar directorio más reciente
                 std::string latestDir = findLatestResultsDir(outputDir);
+                std::cout << "Directorio más reciente encontrado: " << (latestDir.empty() ? "(ninguno)" : latestDir) << "\n";
+                
                 if (!latestDir.empty()) {
                     std::string basePath = outputDir + "\\" + latestDir + "\\";
+                    std::cout << "Buscando CSVs en: " << basePath << "\n";
                     
                     // Leer CSVs
                     std::vector<std::vector<std::string>> timesCSV = parseCSV(basePath + "times-W-nosort.csv");
@@ -517,6 +538,13 @@ int main() {
                     std::vector<std::vector<std::string>> timeDevCSV = parseCSV(basePath + "time-dev-W-nosort.csv");
                     std::vector<std::vector<std::string>> tightnessCSV = parseCSV(basePath + "tightness-W.csv");
                     
+                    std::cout << "CSVs leídos - times: " << timesCSV.size() << " filas, pruned: " << prunedCSV.size() 
+                              << " filas, accuracy: " << accuracyCSV.size() << " filas\n";
+                    
+                    if (timesCSV.empty() && prunedCSV.empty() && accuracyCSV.empty()) {
+                        std::cerr << "ADVERTENCIA: Todos los CSVs están vacíos. TSTester.exe puede no haber generado resultados.\n";
+                    }
+                    
                     allCSVData.push_back(timesCSV);
                     allCSVData.push_back(prunedCSV);
                     allCSVData.push_back(accuracyCSV);
@@ -524,6 +552,8 @@ int main() {
                     allCSVData.push_back(timeDevCSV);
                     
                     experimentType = "nnUnsorted";
+                } else {
+                    std::cerr << "ERROR: No se encontró directorio de resultados. Verifica que TSTester.exe se ejecutó correctamente.\n";
                 }
             }
             
@@ -564,12 +594,18 @@ int main() {
                 std::string output = executeCommand(cmd);
                 std::cout << "Output: " << output << "\n";
                 
-                std::this_thread::sleep_for(std::chrono::seconds(3));
+                // Esperar más tiempo para tightness test (puede tardar mucho)
+                std::this_thread::sleep_for(std::chrono::seconds(10));
                 
+                // Buscar el directorio más reciente (puede ser diferente al de nnUnsorted)
                 std::string latestDir = findLatestResultsDir(outputDir);
+                std::cout << "Directorio tightness encontrado: " << (latestDir.empty() ? "(ninguno)" : latestDir) << "\n";
+                
                 if (!latestDir.empty()) {
                     std::string basePath = outputDir + "\\" + latestDir + "\\";
+                    std::cout << "Buscando tightness-W.csv en: " << basePath << "\n";
                     std::vector<std::vector<std::string>> tightnessCSV = parseCSV(basePath + "tightness-W.csv");
+                    std::cout << "Tightness CSV leído: " << tightnessCSV.size() << " filas\n";
                     
                     // Si no hay otros datos, usar solo tightness
                     if (allCSVData.empty()) {
@@ -591,12 +627,15 @@ int main() {
             // Convertir a JSON
             if (!allCSVData.empty()) {
                 std::string jsonResult = resultsToJSON(allCSVData, datasets, bounds, experimentType, window);
+                std::cout << "JSON generado (primeros 500 chars): " << jsonResult.substr(0, 500) << "\n";
                 res.set_content(jsonResult, "application/json");
+                res.status = 200;
             } else {
-                res.set_content("{\"error\": \"No se pudieron leer los resultados\"}", "application/json");
+                std::cerr << "ERROR: allCSVData está vacío. No se pudieron leer los resultados.\n";
+                std::cerr << "Verifica que TSTester.exe se ejecutó correctamente y generó los CSVs.\n";
+                res.set_content("{\"status\": \"error\", \"error\": \"No se pudieron leer los resultados. Verifica que TSTester.exe se ejecutó correctamente.\"}", "application/json");
                 res.status = 500;
             }
-            res.status = 200;
             
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << "\n";

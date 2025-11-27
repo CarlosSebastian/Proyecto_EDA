@@ -1,1 +1,58 @@
- 
+Servidor iniciado en http://localhost:8081
+Endpoints disponibles:
+  POST /api/experiment/run
+  GET  /api/datasets
+  GET  /api/health
+Recibida petición de experimento
+Body recibido: {"experimentTypes":{"tightness":true,"nnUnsorted":true,"nnSorted":false},"windowConfig":{"type":"optimal"},"bounds":["keogh","webb"],"datasets":["50words","Adiac","CBF","FaceAll","Two_Patterns"]}
+Body length: 195
+Bounds extraídos: keogh webb 
+Datasets extraídos: 50words Adiac CBF FaceAll Two_Patterns 
+Encontrado experimentTypes en posición: 1
+Tightness: 1, nnUnsorted: 1, nnSorted: 0
+Encontrado windowConfig en posición: 73
+Window type: optimal
+Ejecutando 1-NN UNSORTED...
+Comando: "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\bin\TSTester.exe" -bkeogh,webb -W -d50words,Adiac,CBF,FaceAll,Two_Patterns -D "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\UCR_TS_Archive_2015" -n "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\resultados_api"
+Output: 
+Ejecutando tightness test...
+Comando: "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\bin\TSTester.exe" -bkeogh,webb -W -d50words,Adiac,CBF,FaceAll,Two_Patterns -t -D "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\UCR_TS_Archive_2015" -n "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\resultados_api"
+Output: 
+Recibida petición de experimento
+Body recibido: {"experimentTypes":{"tightness":true,"nnUnsorted":true,"nnSorted":false},"windowConfig":{"type":"optimal"},"bounds":["keogh","webb"],"datasets":["50words","Adiac","CBF","FaceAll","Two_Patterns"]}
+Body length: 195
+Bounds extraídos: keogh webb 
+Datasets extraídos: 50words Adiac CBF FaceAll Two_Patterns 
+Encontrado experimentTypes en posición: 1
+Tightness: 1, nnUnsorted: 1, nnSorted: 0
+Encontrado windowConfig en posición: 73
+Window type: optimal
+Ejecutando 1-NN UNSORTED...
+Comando: "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\bin\TSTester.exe" -bkeogh,webb -W -d50words,Adiac,CBF,FaceAll,Two_Patterns -D "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\UCR_TS_Archive_2015" -n "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\resultados_api"
+Output: 
+Ejecutando tightness test...
+Comando: "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\bin\TSTester.exe" -bkeogh,webb -W -d50words,Adiac,CBF,FaceAll,Two_Patterns -t -D "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\UCR_TS_Archive_2015" -n "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\resultados_api"
+Output: 
+Recibida petición de experimento
+Body recibido: {"experimentTypes":{"tightness":true,"nnUnsorted":true,"nnSorted":false},"windowConfig":{"type":"optimal"},"bounds":["keogh","webb"],"datasets":["50words","Adiac","CBF","FaceAll","Two_Patterns"]}
+Body length: 195
+Bounds extraídos: keogh webb 
+Datasets extraídos: 50words Adiac CBF FaceAll Two_Patterns 
+Encontrado experimentTypes en posición: 1
+Tightness: 1, nnUnsorted: 1, nnSorted: 0
+Encontrado windowConfig en posición: 73
+Window type: optimal
+Ejecutando 1-NN UNSORTED...
+Comando: "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\bin\TSTester.exe" -bkeogh,webb -W -d50words,Adiac,CBF,FaceAll,Two_Patterns -D "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\UCR_TS_Archive_2015" -n "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\resultados_api"
+Output: 
+Ejecutando tightness test...
+Comando: "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\bin\TSTester.exe" -bkeogh,webb -W -d50words,Adiac,CBF,FaceAll,Two_Patterns -t -D "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\UCR_TS_Archive_2015" -n "C:\Users\carlo\Downloads\EDA PROYECTO\Proyecto_EDA\src\resultados_api"
+Output: 
+Recibida petición de experimento
+Body recibido: {"experimentTypes":{"tightness":true,"nnUnsorted":true,"nnSorted":false},"windowConfig":{"type":"optimal"},"bounds":["keogh","webb"],"datasets":["50words","Adiac","CBF","FaceAll","Two_Patterns"]}
+Body length: 195
+Bounds extraídos: keogh webb 
+Datasets extraídos: 50words Adiac CBF FaceAll Two_Patterns 
+Encontrado experimentTypes en posición: 1
+Tightness: 1, nnUnsorted: 1, nnSorted: 0
+Encontrado windowConf

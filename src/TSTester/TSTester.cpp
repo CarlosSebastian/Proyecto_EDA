@@ -637,14 +637,80 @@ void TSTester::doTest(int window, bool winPercent, std::vector<std::string>& bou
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, 999999);
     
-    std::string fullDate = date + "-" + std::to_string(dis(gen));
+    // Construir nombre descriptivo
+    std::ostringstream descName;
+    
+    // Tipo de experimento
+    std::string expType;
+    if (experiment == ExperimentType::TEST_TIGHTNESS) {
+        expType = "tightness";
+    } else if (experiment == ExperimentType::SORTED) {
+        expType = "sorted";
+    } else {
+        expType = "unsorted";
+    }
+    descName << expType << "_";
+    
+    // Bounds (máximo 3 para no hacer el nombre muy largo)
+    if (!boundsStr.empty()) {
+        descName << "B";
+        for (size_t i = 0; i < boundsStr.size() && i < 3; i++) {
+            if (i > 0) descName << "-";
+            // Acortar nombres de bounds
+            std::string b = boundsStr[i];
+            if (b == "keogh") descName << "K";
+            else if (b == "improved") descName << "I";
+            else if (b == "enhanced") descName << "E";
+            else if (b == "petitjean") descName << "P";
+            else if (b == "webb") descName << "W";
+            else if (b == "enhancedwebb") descName << "EW";
+            else descName << b.substr(0, 3);
+        }
+        if (boundsStr.size() > 3) descName << "+";
+        descName << "_";
+    }
+    
+    // Window config
+    if (window == -2) {
+        descName << "Wopt_";
+    } else if (winPercent) {
+        descName << "W" << window << "pct_";
+    } else {
+        descName << "W" << window << "_";
+    }
+    
+    // Datasets (máximo 3 para no hacer el nombre muy largo)
+    if (!datasets.empty()) {
+        descName << "D";
+        for (size_t i = 0; i < datasets.size() && i < 3; i++) {
+            if (i > 0) descName << "-";
+            descName << datasets[i].substr(0, 6); // Primeros 6 caracteres
+        }
+        if (datasets.size() > 3) descName << "+" << (datasets.size() - 3) << "more";
+        descName << "_";
+    }
+    
+    // Timestamp al final
+    descName << date << "-" << std::to_string(dis(gen));
+    
+    std::string fullDate = descName.str();
+    
+    // Limpiar caracteres no válidos para nombres de carpeta
+    std::replace(fullDate.begin(), fullDate.end(), ' ', '_');
+    std::replace(fullDate.begin(), fullDate.end(), '/', '-');
+    std::replace(fullDate.begin(), fullDate.end(), '\\', '-');
+    std::replace(fullDate.begin(), fullDate.end(), ':', '-');
     
     std::filesystem::create_directories(outName);
     
     std::string outDir = outName + OSUtils::directorySep() + fullDate;
     
     while (std::filesystem::exists(outDir)) {
-        fullDate = date + "-" + std::to_string(dis(gen));
+        fullDate = descName.str() + "-" + std::to_string(dis(gen));
+        std::replace(fullDate.begin(), fullDate.end(), ' ', '_');
+        std::replace(fullDate.begin(), fullDate.end(), '/', '-');
+        std::replace(fullDate.begin(), fullDate.end(), '\\', '-');
+        std::replace(fullDate.begin(), fullDate.end(), ':', '-');
         outDir = outName + OSUtils::directorySep() + fullDate;
     }
     
