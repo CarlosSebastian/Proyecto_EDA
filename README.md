@@ -62,16 +62,35 @@ Sigue estos pasos en orden para ejecutar todo el sistema:
 
 El backend API necesita `TSTester.exe` compilado para ejecutar los experimentos.
 
-**En PowerShell:**
+**Opción A: Usar build.sh (funciona en Git Bash, WSL, Linux, Mac)**
+```powershell
+# Navegar al directorio src
+cd src
+
+# Ejecutar script (en Git Bash o WSL)
+bash build.sh
+
+# O si tienes permisos de ejecución:
+./build.sh
+```
+
+**Opción B: Usar Makefile (requiere make instalado)**
 ```powershell
 # Navegar al directorio src
 cd src
 
 # Compilar TSTester
 make
+```
 
-# Si no tienes make, compila manualmente:
-# g++ -std=c++17 -O3 $(Get-ChildItem -Recurse -Filter "*.cpp") -o bin/TSTester.exe
+**Opción C: Compilar manualmente**
+```powershell
+# Navegar al directorio src
+cd src
+
+# Buscar todos los archivos .cpp y compilar
+$cppFiles = Get-ChildItem -Recurse -Filter "*.cpp" | ForEach-Object { $_.FullName }
+g++ -std=c++17 -O3 $cppFiles -o bin\TSTester.exe
 ```
 
 **Verificar que se compiló correctamente:**
@@ -204,7 +223,8 @@ Invoke-WebRequest -Uri "http://localhost:8081/api/health" -UseBasicParsing
 ```powershell
 # 1. Compilar TSTester
 cd src
-make
+bash build.sh
+# O si tienes make: make
 
 # 2. Compilar Backend API
 cd backend
@@ -522,9 +542,18 @@ Test-Path src\resultados_api
 **Causa:** `make` no está instalado en Windows.
 
 **Solución:**
-```powershell
-# En Windows, compila manualmente con g++
-cd src
+1. **Usa build.sh con Git Bash** (si tienes Git instalado):
+   ```powershell
+   cd src
+   bash build.sh
+   ```
+
+2. **O instala MinGW-w64 o MSYS2** que incluye `make`
+
+3. **O compila manualmente** con `g++`:
+   ```powershell
+   # En Windows, compila manualmente con g++
+   cd src
 g++ -std=c++17 -O3 $(Get-ChildItem -Recurse -Filter "*.cpp") -o bin/TSTester.exe
 ```
 
