@@ -222,11 +222,21 @@ std::string resultsToJSON(const std::vector<std::vector<std::vector<std::string>
             double tightness = 0.0;
             bool hasTightness = false;
             
+            // Función auxiliar para convertir string a double de forma segura
+            auto safeStod = [](const std::string& str) -> double {
+                try {
+                    if (str.empty()) return 0.0;
+                    return std::stod(str);
+                } catch (const std::exception&) {
+                    return 0.0;
+                }
+            };
+            
             // Times
             if (csvData.size() > 0 && d < csvData[0].size()) {
                 const auto& row = csvData[0][d];
                 if (b + 1 < row.size()) {
-                    time = std::stod(row[b + 1]);
+                    time = safeStod(row[b + 1]);
                 }
             }
             
@@ -234,7 +244,7 @@ std::string resultsToJSON(const std::vector<std::vector<std::vector<std::string>
             if (csvData.size() > 4 && d < csvData[4].size()) {
                 const auto& row = csvData[4][d];
                 if (b + 1 < row.size()) {
-                    timeStdDev = std::stod(row[b + 1]);
+                    timeStdDev = safeStod(row[b + 1]);
                 }
             }
             
@@ -242,7 +252,7 @@ std::string resultsToJSON(const std::vector<std::vector<std::vector<std::string>
             if (csvData.size() > 1 && d < csvData[1].size()) {
                 const auto& row = csvData[1][d];
                 if (b + 1 < row.size()) {
-                    pruned = std::stod(row[b + 1]);
+                    pruned = safeStod(row[b + 1]);
                 }
             }
             
@@ -250,7 +260,7 @@ std::string resultsToJSON(const std::vector<std::vector<std::vector<std::string>
             if (csvData.size() > 2 && d < csvData[2].size()) {
                 const auto& row = csvData[2][d];
                 if (b + 1 < row.size()) {
-                    accuracy = std::stod(row[b + 1]);
+                    accuracy = safeStod(row[b + 1]);
                 }
             }
             
@@ -258,8 +268,11 @@ std::string resultsToJSON(const std::vector<std::vector<std::vector<std::string>
             if (csvData.size() > 3 && d < csvData[3].size()) {
                 const auto& row = csvData[3][d];
                 if (b + 1 < row.size()) {
-                    tightness = std::stod(row[b + 1]);
-                    hasTightness = true;
+                    const std::string& tightnessStr = row[b + 1];
+                    if (!tightnessStr.empty()) {
+                        tightness = safeStod(tightnessStr);
+                        hasTightness = true;
+                    }
                 }
             }
             
@@ -463,6 +476,9 @@ int main() {
                                 size_t numEnd = windowConfigSection.find_first_not_of("0123456789", numStart);
                                 if (numEnd != std::string::npos) {
                                     windowValue = std::stoi(windowConfigSection.substr(numStart, numEnd - numStart));
+                                } else {
+                                    // Si no hay fin, tomar hasta el final de la sección
+                                    windowValue = std::stoi(windowConfigSection.substr(numStart));
                                 }
                             }
                         }
@@ -471,19 +487,6 @@ int main() {
             } else {
                 std::cout << "windowConfig no encontrado, usando optimal por defecto\n";
                 windowType = "optimal";
-            }
-            
-            // Extraer windowValue si existe
-            size_t valuePos = body.find("\"value\"");
-            if (valuePos != std::string::npos) {
-                valuePos = body.find(":", valuePos);
-                if (valuePos != std::string::npos) {
-                    size_t numStart = body.find_first_of("0123456789", valuePos);
-                    if (numStart != std::string::npos) {
-                        size_t numEnd = body.find_first_not_of("0123456789", numStart);
-                        windowValue = std::stoi(body.substr(numStart, numEnd - numStart));
-                    }
-                }
             }
             
             // Validar
@@ -541,8 +544,21 @@ int main() {
                     std::cout << "CSVs leídos - times: " << timesCSV.size() << " filas, pruned: " << prunedCSV.size() 
                               << " filas, accuracy: " << accuracyCSV.size() << " filas\n";
                     
+                    // Verificar que los archivos existen y tienen datos
                     if (timesCSV.empty() && prunedCSV.empty() && accuracyCSV.empty()) {
                         std::cerr << "ADVERTENCIA: Todos los CSVs están vacíos. TSTester.exe puede no haber generado resultados.\n";
+                        std::cerr << "Verificando existencia de archivos en: " << basePath << "\n";
+                        
+                        // Verificar si los archivos existen
+                        if (!fs::exists(basePath + "times-W-nosort.csv")) {
+                            std::cerr << "ERROR: times-W-nosort.csv no existe\n";
+                        }
+                        if (!fs::exists(basePath + "pruned-W-nosort.csv")) {
+                            std::cerr << "ERROR: pruned-W-nosort.csv no existe\n";
+                        }
+                        if (!fs::exists(basePath + "accuracy-W-nosort.csv")) {
+                            std::cerr << "ERROR: accuracy-W-nosort.csv no existe\n";
+                        }
                     }
                     
                     allCSVData.push_back(timesCSV);

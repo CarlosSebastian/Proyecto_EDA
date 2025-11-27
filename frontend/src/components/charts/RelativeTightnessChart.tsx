@@ -25,6 +25,28 @@ export const RelativeTightnessChart: React.FC<RelativeTightnessChartProps> = ({
   baseline,
   compareTo,
 }) => {
+  // Filtrar compareTo para incluir solo bounds que existen en los resultados y tienen datos
+  const validCompareTo = compareTo.filter(bound => {
+    return results.some(exp => {
+      const boundData = exp.bounds[bound];
+      return boundData && boundData.tightness !== undefined && boundData.tightness > 0;
+    });
+  });
+
+  // Si no hay bounds válidos para comparar, no mostrar el gráfico
+  if (validCompareTo.length === 0) {
+    return (
+      <Paper sx={{ p: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Tightness Relativo (vs {baseline})
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          No hay datos de tightness disponibles para comparar.
+        </Typography>
+      </Paper>
+    );
+  }
+
   // Calcular tightness relativo para cada bound a comparar
   const chartData = results.map(exp => {
     const data: { dataset: string; [key: string]: string | number } = {
@@ -33,18 +55,18 @@ export const RelativeTightnessChart: React.FC<RelativeTightnessChartProps> = ({
 
     // Verificar que el baseline existe en los resultados
     const baselineData = exp.bounds[baseline];
-    if (!baselineData?.tightness) {
+    if (!baselineData?.tightness || baselineData.tightness === 0) {
       // Si no hay baseline, mostrar valores absolutos en lugar de ratios
-      compareTo.forEach(bound => {
+      validCompareTo.forEach(bound => {
         const compareData = exp.bounds[bound];
         data[bound] = compareData?.tightness || 0;
       });
     } else {
       // Calcular ratios relativos al baseline
-      compareTo.forEach(bound => {
+      validCompareTo.forEach(bound => {
         const compareData = exp.bounds[bound];
 
-        if (compareData?.tightness) {
+        if (compareData?.tightness && compareData.tightness > 0) {
           // Ratio: si > 1.0, el bound comparado es más tight
           data[bound] = compareData.tightness / baselineData.tightness;
         } else {
@@ -75,7 +97,7 @@ export const RelativeTightnessChart: React.FC<RelativeTightnessChartProps> = ({
             <Tooltip />
             <Legend />
             <ReferenceLine y={1.0} stroke="#666" strokeDasharray="3 3" label="Baseline" />
-            {compareTo.map((bound, index) => (
+            {validCompareTo.map((bound, index) => (
               <Bar
                 key={bound}
                 dataKey={bound}
