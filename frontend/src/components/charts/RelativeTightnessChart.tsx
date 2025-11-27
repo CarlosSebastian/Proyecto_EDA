@@ -16,8 +16,8 @@ import type { ExperimentResult } from '@/types/experiment';
 
 interface RelativeTightnessChartProps {
   results: ExperimentResult[];
-  baseline: string;
-  compareTo: string[];
+  baseline?: string;
+  compareTo?: string[];
 }
 
 export const RelativeTightnessChart: React.FC<RelativeTightnessChartProps> = ({
@@ -25,55 +25,42 @@ export const RelativeTightnessChart: React.FC<RelativeTightnessChartProps> = ({
   baseline,
   compareTo,
 }) => {
-  // Filtrar compareTo para incluir solo bounds que existen en los resultados y tienen datos
-  const validCompareTo = compareTo.filter(bound => {
-    return results.some(exp => {
-      const boundData = exp.bounds[bound];
-      return boundData && boundData.tightness !== undefined && boundData.tightness > 0;
-    });
-  });
+  // Obtener TODOS los bounds que tienen datos de tightness en los resultados
+  // No importa qué bounds se pasaron como props, mostramos todos los disponibles
+  const allBounds = results.length > 0
+    ? Object.keys(results[0].bounds).filter(bound => {
+        return results.some(exp => {
+          const boundData = exp.bounds[bound];
+          return boundData && boundData.tightness !== undefined && boundData.tightness > 0;
+        });
+      })
+    : [];
 
-  // Si no hay bounds válidos para comparar, no mostrar el gráfico
-  if (validCompareTo.length === 0) {
+  // Si no hay bounds válidos, no mostrar el gráfico
+  if (allBounds.length === 0) {
     return (
       <Paper sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom>
-          Tightness Relativo (vs {baseline})
+          Tightness de Lower Bounds
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          No hay datos de tightness disponibles para comparar.
+          No hay datos de tightness disponibles.
         </Typography>
       </Paper>
     );
   }
 
-  // Calcular tightness relativo para cada bound a comparar
+  // Mostrar valores absolutos de tightness para todos los bounds
   const chartData = results.map(exp => {
     const data: { dataset: string; [key: string]: string | number } = {
       dataset: exp.dataset,
     };
 
-    // Verificar que el baseline existe en los resultados
-    const baselineData = exp.bounds[baseline];
-    if (!baselineData?.tightness || baselineData.tightness === 0) {
-      // Si no hay baseline, mostrar valores absolutos en lugar de ratios
-      validCompareTo.forEach(bound => {
-        const compareData = exp.bounds[bound];
-        data[bound] = compareData?.tightness || 0;
-      });
-    } else {
-      // Calcular ratios relativos al baseline
-      validCompareTo.forEach(bound => {
-        const compareData = exp.bounds[bound];
-
-        if (compareData?.tightness && compareData.tightness > 0) {
-          // Ratio: si > 1.0, el bound comparado es más tight
-          data[bound] = compareData.tightness / baselineData.tightness;
-        } else {
-          data[bound] = 0;
-        }
-      });
-    }
+    // Agregar tightness absoluto para cada bound
+    allBounds.forEach(bound => {
+      const boundData = exp.bounds[bound];
+      data[bound] = boundData?.tightness || 0;
+    });
 
     return data;
   });
@@ -83,21 +70,20 @@ export const RelativeTightnessChart: React.FC<RelativeTightnessChartProps> = ({
   return (
     <Paper sx={{ p: 3 }}>
       <Typography variant="h6" gutterBottom>
-        Tightness Relativo (vs {baseline})
+        Tightness de Lower Bounds
       </Typography>
       <Typography variant="body2" color="text.secondary" gutterBottom>
-        Ratio &gt; 1.0 indica que el bound es más ajustado (tighter) que {baseline}
+        Valores absolutos de tightness. Valores más altos indican bounds más ajustados (tighter).
       </Typography>
       <Box sx={{ mt: 2 }}>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="dataset" angle={-45} textAnchor="end" height={100} />
-            <YAxis label={{ value: 'Tightness Ratio', angle: -90, position: 'insideLeft' }} />
+            <YAxis label={{ value: 'Tightness', angle: -90, position: 'insideLeft' }} />
             <Tooltip />
             <Legend />
-            <ReferenceLine y={1.0} stroke="#666" strokeDasharray="3 3" label="Baseline" />
-            {validCompareTo.map((bound, index) => (
+            {allBounds.map((bound, index) => (
               <Bar
                 key={bound}
                 dataKey={bound}
