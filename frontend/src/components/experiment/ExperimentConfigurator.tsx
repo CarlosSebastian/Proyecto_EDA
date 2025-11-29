@@ -1,26 +1,16 @@
 import React, { useState } from 'react';
 import {
-  Paper,
   Typography,
   FormGroup,
   FormControlLabel,
   Checkbox,
-  Radio,
-  RadioGroup,
-  FormControl,
-  FormLabel,
-  TextField,
   Button,
   Box,
-  Alert,
   Card,
-  CardContent,
   Divider,
-  Chip,
   Stack,
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import SettingsIcon from '@mui/icons-material/Settings';
 import ScienceIcon from '@mui/icons-material/Science';
 import { BoundSelector } from './BoundSelector';
 import { DatasetSelector } from './DatasetSelector';
@@ -42,10 +32,6 @@ export const ExperimentConfigurator: React.FC<ExperimentConfiguratorProps> = ({
     nnUnsorted: true,
     nnSorted: false,
   });
-
-  const [windowType, setWindowType] = useState<'optimal' | 'fixed' | 'percentage'>('optimal');
-  const [windowValue, setWindowValue] = useState<number>(10);
-  const [windowPercentages, setWindowPercentages] = useState<number[]>([1, 10, 20]);
 
   const [selectedBounds, setSelectedBounds] = useState<string[]>(['keogh', 'webb']);
   const [boundParameters, setBoundParameters] = useState<{ [key: string]: number }>({
@@ -80,9 +66,7 @@ export const ExperimentConfigurator: React.FC<ExperimentConfiguratorProps> = ({
     const config: ExperimentConfig = {
       experimentTypes,
       windowConfig: {
-        type: windowType,
-        value: windowType !== 'optimal' ? windowValue : undefined,
-        multiple: windowType === 'percentage' ? windowPercentages : undefined,
+        type: 'optimal',
       },
       bounds: selectedBounds.map(bound => {
         if (boundParameters[bound]) {
@@ -150,71 +134,6 @@ export const ExperimentConfigurator: React.FC<ExperimentConfiguratorProps> = ({
             label="1-NN SORTED (ventana óptima)"
           />
         </FormGroup>
-      </Card>
-
-      <Card sx={{ p: 3, borderRadius: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <SettingsIcon sx={{ mr: 1, color: 'primary.main' }} />
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Configuración de Ventana
-          </Typography>
-        </Box>
-        <Divider sx={{ mb: 2 }} />
-        <FormControl component="fieldset">
-          <RadioGroup
-            value={windowType}
-            onChange={e =>
-              setWindowType(e.target.value as 'optimal' | 'fixed' | 'percentage')
-            }
-          >
-            <FormControlLabel
-              value="optimal"
-              control={<Radio />}
-              label="Óptima (-W)"
-            />
-            <FormControlLabel
-              value="fixed"
-              control={<Radio />}
-              label="Fija (-w)"
-            />
-            <FormControlLabel
-              value="percentage"
-              control={<Radio />}
-              label="Porcentaje (-g)"
-            />
-          </RadioGroup>
-        </FormControl>
-
-        {windowType === 'fixed' && (
-          <TextField
-            type="number"
-            label="Tamaño de ventana"
-            value={windowValue}
-            onChange={e => setWindowValue(parseInt(e.target.value) || 0)}
-            sx={{ mt: 2, width: 200 }}
-            inputProps={{ min: 1 }}
-          />
-        )}
-
-        {windowType === 'percentage' && (
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="body2" gutterBottom>
-              Porcentajes (separados por comas):
-            </Typography>
-            <TextField
-              fullWidth
-              placeholder="1, 10, 20"
-              value={windowPercentages.join(', ')}
-              onChange={e => {
-                const values = e.target.value
-                  .split(',')
-                  .map(v => parseInt(v.trim()))
-                  .filter(v => !isNaN(v));
-                setWindowPercentages(values);
-              }}
-            />
-          </Box>
-        )}
       </Card>
 
       <BoundSelector
